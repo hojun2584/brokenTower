@@ -155,10 +155,12 @@ namespace CustomPacket
     public class StartGamePacket : Packet
     {
         public int roomNum;
-        public StartGamePacket(int roomNum)
+        public int roomMasterId;
+        public StartGamePacket(int roomNum, int roomMasterId)
         {
             packetNum = PacketID.GAME_START;
             this.roomNum = roomNum;
+            //this.roomMasterId = roomMasterId;
         }
         public override void Read(ArraySegment<byte> buffer)
         {
@@ -170,6 +172,8 @@ namespace CustomPacket
             count += sizeof(ushort);
             BitConverter.TryWriteBytes(new Span<byte>(buffer.Array, buffer.Offset + count, buffer.Count - count), roomNum);
             count += sizeof(int);
+            //BitConverter.TryWriteBytes(new Span<byte>(buffer.Array, buffer.Offset + count, buffer.Count - count), roomNum);
+            //count += sizeof(int);
         }
     }
 

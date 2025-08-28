@@ -124,10 +124,9 @@ namespace Assets.Scripts.Network.Packet
 
             JobQueue.Instance.Add(() =>
             {
-                UnityEngine.Debug.Log("방에 들어간 다음에 해야 할 일들임");
-                UnityEngine.Debug.Log(packet.roomNum);
-
+                
                 LobbyManager.Instance.CurrentGameRoom = packet.room;
+                //LobbyManager.Instance.CurrentGameRoom.Enter(GameManager.Instance.CurrentPlayer);
                 SceneManager.LoadScene("GameRoom");
             });
         }

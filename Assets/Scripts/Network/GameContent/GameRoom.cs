@@ -13,25 +13,20 @@ namespace Server
     public class GameRoom : IPacketSerializeable
     {
         List<PlayerStruct> playerList = new List<PlayerStruct>();
-        public List<Session> playerSessions = new List<Session>();
         public int roomNum = -1;
 
         int startAblePlayer = 2;
 
-        public List<Session> PlayerSessions {
-            get => playerSessions;
-            set 
-            {
-                playerSessions = value;
-            }
-        }
         int serverObject = 0;
-        public Session roomMaster;
+        public int roomMaster = -1;
 
         public string roomName;
 
         public void Enter(PlayerStruct player)
         {
+            if (roomMaster == -1)
+                roomMaster = player.playerSerial;
+
             playerList.Add(player);
         }
 
