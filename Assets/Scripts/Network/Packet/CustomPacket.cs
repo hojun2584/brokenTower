@@ -48,6 +48,8 @@ namespace CustomPacket
         GAME_START = 50,
         GAME_START_RESULT = 51,
 
+        ROOM_MASTER = 60,
+
         SUMMON = 70,
         SUMMON_RESULT = 71,
     }
@@ -180,22 +182,48 @@ namespace CustomPacket
     public class StartGameResultPacket : Packet
     {
         public bool isStart;
+        public int roomMasterId;
         public StartGameResultPacket()
         {
-            packetNum = PacketID.GAME_START;
+            packetNum = PacketID.GAME_START_RESULT;
         }
         public override void Read(ArraySegment<byte> buffer)
         {
             ushort count = 4;
             isStart = BitConverter.ToBoolean(buffer.Array, buffer.Offset + count);
             count += sizeof(bool);
+            roomMasterId = BitConverter.ToInt32(buffer.Array, buffer.Offset + count);
+            count += sizeof(int);
         }
         protected override void WriteTemplate(ref ArraySegment<byte> buffer, ref ushort count)
         {
             BitConverter.TryWriteBytes(new Span<byte>(buffer.Array, buffer.Offset + count, buffer.Count - count), (ushort)packetNum);
             count += sizeof(ushort);
-            BitConverter.TryWriteBytes(new Span<byte>(buffer.Array, buffer.Offset + count, buffer.Count - count), isStart);
-            count += sizeof(bool);
+            // 생략 이건 서버로 보낼 필요가 없음
+        }
+    }
+
+    public class RoomMasterPacket : Packet
+    {
+        public int roomMasterId;
+        public RoomMasterPacket()
+        {
+            packetNum = PacketID.ROOM_MASTER;
+        }
+        public void Init(int roomMasterId)
+        {
+            this.roomMasterId = roomMasterId;
+        }
+
+        public override void Read(ArraySegment<byte> buffer)
+        {
+        }
+        protected override void WriteTemplate(ref ArraySegment<byte> buffer, ref ushort count)
+        {
+            BitConverter.TryWriteBytes(new Span<byte>(buffer.Array, buffer.Offset + count, buffer.Count - count), (ushort)packetNum);
+            count += sizeof(ushort);
+            BitConverter.TryWriteBytes(new Span<byte>(buffer.Array, buffer.Offset + count, buffer.Count - count), roomMasterId);
+            count += sizeof(int);
         }
     }
 

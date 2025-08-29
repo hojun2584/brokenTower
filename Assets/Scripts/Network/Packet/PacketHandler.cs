@@ -141,8 +141,20 @@ namespace Assets.Scripts.Network.Packet
         {
             StartGameResultPacket packet = new StartGameResultPacket();
             packet.Read(buffer);
+            LobbyManager.Instance.CurrentGameRoom.roomMaster = packet.roomMasterId;
+
             JobQueue.Instance.Add(() =>
             {
+                if(LobbyManager.Instance.CurrentGameRoom.roomMaster == session.SessionId)
+                {
+                    FloatingBar.Instance.SetTmpText = "roomMaster Setting!!!!";
+                }
+                else
+                {
+                    FloatingBar.Instance.SetTmpText = "Not roomMaster";
+                }
+
+
                 if (packet.isStart)
                 {
                     SceneManager.LoadScene("GameScene");

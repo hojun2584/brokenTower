@@ -4203,6 +4203,7 @@ GameObject:
   - component: {fileID: 532369924}
   - component: {fileID: 532369923}
   - component: {fileID: 532369922}
+  - component: {fileID: 532369925}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -4284,6 +4285,18 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 90, y: 0, z: 0}
+--- !u!114 &532369925
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 532369921}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b734b98860541ce42b4ca3727fa1b9be, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &534238308
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -7430,6 +7443,10 @@ PrefabInstance:
       propertyPath: enemyTower
       value: 
       objectReference: {fileID: 1979209343}
+    - target: {fileID: 7133354131563805657, guid: 73ecba1cd3b1e034bb2177c5bf3d42d9, type: 3}
+      propertyPath: gameCamera
+      value: 
+      objectReference: {fileID: 532369925}
     - target: {fileID: 7133354131563805657, guid: 73ecba1cd3b1e034bb2177c5bf3d42d9, type: 3}
       propertyPath: list.Array.size
       value: 3

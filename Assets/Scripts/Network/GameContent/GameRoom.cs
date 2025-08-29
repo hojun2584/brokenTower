@@ -47,7 +47,6 @@ namespace Server
 
 
 
-
         public void SerializePacket(ref ArraySegment<byte> buffer, ref ushort count)
         {
             BitConverter.TryWriteBytes(new Span<byte>(buffer.Array, buffer.Offset + count, buffer.Count - count), playerList.Count);

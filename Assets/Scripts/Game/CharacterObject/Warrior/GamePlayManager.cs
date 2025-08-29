@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using Hojun;
 using CustomPacket;
+using System;
+using CustomClient;
 
 namespace Hojun
 {
@@ -13,11 +15,15 @@ namespace Hojun
         public CustomPriorityQue<Tower> towers = new CustomPriorityQue<Tower> ( ( x , y ) => { return x.towerPriority > y.towerPriority; } );
         public List<Node> nodes = new List<Node> ();
 
+        public GameRoomCameraController gameCamera;
+
         public Tower enemyTower;
         public Tower allieTower;
 
         public GameObject warrior;
         public Dictionary<int , GameObject> spawnDict = new Dictionary<int , GameObject> ();
+
+        public Action gameSetting;
 
         static GamePlayManager instance;
         public static GamePlayManager Instance { get => instance; }
@@ -27,12 +33,22 @@ namespace Hojun
         public void Awake()
         {
             spawnDict[0] = warrior;
+            gameSetting += GameCameraSetting;
         }
 
         public void Start()
         {
             instance = this;
+            gameSetting?.Invoke();
         }
+        
+        public void GameCameraSetting()
+        {
+            if (LobbyManager.Instance.CurrentGameRoom.roomMaster != NetworkManager.instance.session.SessionId)
+                gameCamera.CameraViewSetting();
+        }
+
+
 
 
         public void SpawnCharacter(Node spawn)
