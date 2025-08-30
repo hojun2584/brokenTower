@@ -4,6 +4,8 @@ using UnityEngine;
 using System.Linq;
 using Hojun;
 using System;
+using CustomClient;
+using UnityEditor.Experimental.GraphView;
 
 namespace Hojun
 {
@@ -14,7 +16,7 @@ namespace Hojun
         
         public float attackArea;
         public float atkPoint;
-        public int attackAbleLayer = (int)SummonLayer.Enemy;
+        public int attackAbleLayer;
         public float speed = 1.0f;
 
 
@@ -119,8 +121,8 @@ namespace Hojun
 
         public void Awake()
         {
-            InitObject();
-            warriorStatus.attackAbleLayer = (int)SummonLayer.Enemy;
+            InitSummon();
+            warriorStatus.attackAbleLayer = (int)SummonLayer.Enemy | (int)SummonLayer.EnemyFlight;
         }
 
         public void Update()
@@ -151,17 +153,6 @@ namespace Hojun
             CustomStateMachine.SetState((int)WarriorState.MOVE);
         }
 
-        public void InitObject()
-        {
-            Debug.Log("범위 바꿀 것");
-            warriorStatus = new WarriorInfo.Builder().SetName("Warrior").SetHp(50).SetAttackArea(3.0f).Build();
-
-            targetNode = towerPositon.currentNode;
-            CustomStateMachine.AddState((int)WarriorState.MOVE, new WarriorMoveState(CustomStateMachine));
-            CustomStateMachine.stateDict[(int)WarriorState.MOVE].enterAction += Move;
-            CustomStateMachine.AddState((int)WarriorState.ATTACK, new WarriorAttackState(CustomStateMachine));
-            CustomStateMachine.stateDict[(int)WarriorState.ATTACK].enterAction += () => StopCoroutine("Move");
-        }
 
 
         public bool IsAttackAble()
@@ -264,7 +255,41 @@ namespace Hojun
 
         public override void InitSummon()
         {
-            
+
+            // 레이어 셋팅 하는데 지금 서버에서 내꺼이냐 아니냐 가르쳐 주고 있음
+            // 이거 바탕으로 생성 될 때 내꺼 레이어 설정하고 
+            // 상대꺼 레이어는 무조건 enemy로 설정하면 공격하기 쉬워질 듯?
+            // 완료 하면 260번 줄만 지울 것 <- (자기 자신)
+
+            Debug.Log("범위 바꿀 것");
+
+            if (ownerSessionId == NetworkManager.instance.session.SessionId) 
+            { 
+                warriorStatus = new WarriorInfo.Builder().SetName("Warrior").SetHp(50).SetAttackArea(3.0f).SetAttackLayer((int)SummonLayer.EnemyGround).Build();
+                gameObject.layer = (int)SummonLayer.Player | (int)SummonLayer.PlayerGround;
+            }
+            else
+            {
+                warriorStatus = new WarriorInfo.Builder().SetName("EnemyWarrior").SetHp(50).SetAttackArea(3.0f).SetAttackLayer((int)SummonLayer.PlayerGround).Build();
+                gameObject.layer = (int)SummonLayer.Enemy | (int)SummonLayer.EnemyGround;
+            }
+
+
+
+            targetNode = towerPositon.currentNode;
+            CustomStateMachine.AddState((int)WarriorState.MOVE, new WarriorMoveState(CustomStateMachine));
+            CustomStateMachine.stateDict[(int)WarriorState.MOVE].enterAction += Move;
+            CustomStateMachine.AddState((int)WarriorState.ATTACK, new WarriorAttackState(CustomStateMachine));
+            CustomStateMachine.stateDict[(int)WarriorState.ATTACK].enterAction += () => StopCoroutine("Move");
+        }
+
+        public void SetTargetLayer(int layer)
+        {
+            if(layer == (int)SummonLayer.Player)
+                warriorStatus.attackAbleLayer = (int)SummonLayer.EnemyGround;
+            else
+                warriorStatus.attackAbleLayer = (int)SummonLayer.PlayerGround;
+
         }
     }
 

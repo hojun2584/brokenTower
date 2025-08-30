@@ -17,9 +17,12 @@ namespace Hojun
     {
         
         Player = 1 << 10,
-        PlayerFlight = 1 << 11,
+        PlayerGround = 1 << 11,
+        PlayerFlight = 1 << 12,
+
         Enemy = 1 << 20,
-        EnemyFlight = 1 << 21
+        EnemyGround = 1 << 21,
+        EnemyFlight = 1 << 22,
     }
 
 
@@ -28,13 +31,12 @@ namespace Hojun
         [SerializeField]
         public GamePlayManager gamePlayManager;
         public Animator summonAnimator;
-
+        public int ownerSessionId;
 
         public Node currentNode;
         public Node targetNode;
 
         public abstract void InitSummon();
-
     }
 
 }

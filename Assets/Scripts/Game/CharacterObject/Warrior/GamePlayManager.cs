@@ -40,23 +40,34 @@ namespace Hojun
         {
             instance = this;
             gameSetting?.Invoke();
+
+            if (LobbyManager.Instance.CurrentGameRoom.roomMasterSessionId != NetworkManager.instance.session.SessionId)
+            {
+                Tower swaper = enemyTower;
+                enemyTower = allieTower;
+                allieTower = swaper;
+            }
         }
         
         public void GameCameraSetting()
         {
-            if (LobbyManager.Instance.CurrentGameRoom.roomMaster != NetworkManager.instance.session.SessionId)
+            if (LobbyManager.Instance.CurrentGameRoom.roomMasterSessionId != NetworkManager.instance.session.SessionId)
                 gameCamera.CameraViewSetting();
         }
 
 
+        public void GameAlieSetting(GameObject summondObj)
+        {
+            IAttackAble attacker = summondObj.GetComponent<IAttackAble>();
+        }
 
 
-        public void SpawnCharacter(Node spawn)
+        public void SpawnCharacter(Node spawn , int playerSessionId)
         {
 
             Vector3 spawnPosition = spawn.GetPositionSetY(5f);
             GameObject spawnCharater = Instantiate(spawnDict[setSpawnObjet], spawnPosition, Quaternion.identity);
-
+            
             if (spawnCharater.TryGetComponent<Summoned>(out Summoned summonObj))
             {
                 summonObj.gamePlayManager = this;
@@ -66,9 +77,10 @@ namespace Hojun
         }
 
 
-        void Update()
+        public void SummonCharacter()
         {
-            if (Input.GetMouseButtonDown(1)) // 마우스 오른 쪽 버튼 클릭
+
+            if (Input.GetMouseButtonDown(0)) // 마우스 오른 쪽 버튼 클릭
             {
                 Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
                 RaycastHit hit;
@@ -80,50 +92,17 @@ namespace Hojun
                         Debug.Log("Spawn Node ID: " + spawn.NodeId);
 
                         SummondPacket packet = new SummondPacket();
-                        packet.Init(spawn.NodeId , LobbyManager.Instance.CurrentGameRoom.roomNum);
+                        //packet.Init(spawn.NodeId, LobbyManager.Instance.CurrentGameRoom.roomNum);
 
                         NetworkManager.instance.session.Send(packet.Write());
-
-
-                        // 이 둘이 세트임 워리어 position 안잡고 해서 땅이랑 겹쳐 있는데 그냥 코드상으로 대충 해결 했음!
-                        //Vector3 spawnPosition = spawn.GetPositionSetY(5f);
-                        //GameObject spawnCharater = Instantiate(spawnDict[setSpawnObjet], spawnPosition, Quaternion.identity);
-
-                        //if (spawnCharater.TryGetComponent<Summoned>(out Summoned summonObj))
-                        //{
-                        //    summonObj.gamePlayManager = this;
-                        //    summonObj.currentNode = spawn;
-                        //    summonObj.targetNode = enemyTower.currentNode;
-                        //}
-
                     }
                 }
-
             }
+        }
 
-            //if (Input.GetMouseButtonDown(0)) // 마우스 왼쪽 버튼 클릭 감지
-            //{
-            //    Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-            //    RaycastHit hit;
-            //    if (Physics.Raycast(ray, out hit))
-            //    {
-            //        if (hit.transform.TryGetComponent<Node>(out Node spawn))
-            //        {
-            //            Vector3 spawnPosition = spawn.GetPositionSetY(5f);
-            //            GameObject spawnCharater = Instantiate(spawnDict[setSpawnObjet], spawnPosition, Quaternion.identity);
-
-            //            if (spawnCharater.TryGetComponent<Summoned>(out Summoned summonObj))
-            //            {
-            //                summonObj.gamePlayManager = this;
-            //                summonObj.currentNode = spawn;
-            //                summonObj.targetNode = allieTower.currentNode;
-            //            }
-
-            //        }
-            //    }
-
-            //}
-
+        void Update()
+        {
+            SummonCharacter();
         }
 
         public void OnDestroy()

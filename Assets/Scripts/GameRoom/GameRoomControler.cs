@@ -49,12 +49,10 @@ public class GameRoomControler : MonoBehaviour
         if ( room.IsStartAble() )
         {
             
-            StartGamePacket packet = new StartGamePacket(this.room.roomNum ,Room.roomMaster);
+            StartGamePacket packet = new StartGamePacket(this.room.roomNum ,Room.roomMasterSessionId);
             packet.roomNum = room.roomNum;
             
             NetworkManager.instance.session.Send(packet.Write());
-
-
         }
     }
 

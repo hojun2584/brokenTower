@@ -6,6 +6,7 @@ namespace Hojun
     public interface IAttackAble 
     {
         public void Attack(IHitAble hitObject);
+        public void SetTargetLayer(int layer);
     }
 
     public interface IHitAble

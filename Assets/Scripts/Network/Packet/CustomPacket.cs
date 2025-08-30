@@ -678,15 +678,20 @@ namespace CustomPacket
     {
         public int nodeId;
         public int roomNum;
+        public int playerSessionId;
+
+
 
         public SummondPacket()
         {
             packetNum = PacketID.SUMMON;
         }
 
-        public void Init(int nodeId , int roomNum)
+        public void Init(int nodeId , int roomNum, int playerSessionId)
         {
             this.nodeId = nodeId;
+            this.roomNum = roomNum;
+            this.playerSessionId = playerSessionId;
         }
 
         public override void Read(ArraySegment<byte> buffer)
@@ -698,17 +703,20 @@ namespace CustomPacket
         {
             BitConverter.TryWriteBytes(new Span<byte>(buffer.Array, buffer.Offset + count, buffer.Count - count), (ushort)packetNum);
             count += sizeof(ushort);
-            BitConverter.TryWriteBytes(new Span<byte>(buffer.Array, buffer.Offset + count, buffer.Count - count), LobbyManager.Instance.CurrentGameRoom.roomNum);
+            BitConverter.TryWriteBytes(new Span<byte>(buffer.Array, buffer.Offset + count, buffer.Count - count), roomNum);
             count += sizeof(int);
             BitConverter.TryWriteBytes(new Span<byte>(buffer.Array, buffer.Offset + count, buffer.Count - count), nodeId);
             count += sizeof(int);
-
+            BitConverter.TryWriteBytes(new Span<byte>(buffer.Array, buffer.Offset + count, buffer.Count - count), playerSessionId);
+            count += sizeof(int);
         }
     }
 
     public class SummonResultPacket : Packet
     {
         public int nodeId;
+        public int playerSessionId;
+
         public SummonResultPacket()
         {
             packetNum = PacketID.SUMMON_RESULT;
@@ -717,6 +725,8 @@ namespace CustomPacket
         {
             ushort count = 4;
             nodeId = BitConverter.ToInt32(buffer.Array, buffer.Offset + count);
+            count += sizeof(int);
+            playerSessionId = BitConverter.ToInt32(buffer.Array, buffer.Offset + count);
             count += sizeof(int);
         }
         protected override void WriteTemplate(ref ArraySegment<byte> buffer, ref ushort count)

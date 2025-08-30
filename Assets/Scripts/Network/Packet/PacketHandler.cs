@@ -141,11 +141,11 @@ namespace Assets.Scripts.Network.Packet
         {
             StartGameResultPacket packet = new StartGameResultPacket();
             packet.Read(buffer);
-            LobbyManager.Instance.CurrentGameRoom.roomMaster = packet.roomMasterId;
+            LobbyManager.Instance.CurrentGameRoom.roomMasterSessionId = packet.roomMasterId;
 
             JobQueue.Instance.Add(() =>
             {
-                if(LobbyManager.Instance.CurrentGameRoom.roomMaster == session.SessionId)
+                if(LobbyManager.Instance.CurrentGameRoom.roomMasterSessionId == session.SessionId)
                 {
                     FloatingBar.Instance.SetTmpText = "roomMaster Setting!!!!";
                 }
@@ -203,7 +203,7 @@ namespace Assets.Scripts.Network.Packet
 
                 Node spawnNode = GamePlayManager.Instance.nodes.Find((x)=> x.NodeId == packet.nodeId);
 
-                GamePlayManager.Instance.SpawnCharacter(spawnNode);
+                GamePlayManager.Instance.SpawnCharacter(spawnNode, NetworkManager.instance.session.SessionId);
             });
 
             //SummondPacket packet = new SummondPacket();

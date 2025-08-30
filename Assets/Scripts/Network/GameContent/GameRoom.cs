@@ -18,14 +18,15 @@ namespace Server
         int startAblePlayer = 2;
 
         int serverObject = 0;
-        public int roomMaster = -1;
+        
+        public int roomMasterSessionId = -1;
 
         public string roomName;
 
         public void Enter(PlayerStruct player)
         {
-            if (roomMaster == -1)
-                roomMaster = player.playerSerial;
+            if (roomMasterSessionId == -1)
+                roomMasterSessionId = player.playerSerial;
 
             playerList.Add(player);
         }
