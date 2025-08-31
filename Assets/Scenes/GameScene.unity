@@ -7452,6 +7452,14 @@ PrefabInstance:
       value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 7133354131563805657, guid: 73ecba1cd3b1e034bb2177c5bf3d42d9, type: 3}
+      propertyPath: nodes.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7133354131563805657, guid: 73ecba1cd3b1e034bb2177c5bf3d42d9, type: 3}
+      propertyPath: towers.Array.size
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 7133354131563805657, guid: 73ecba1cd3b1e034bb2177c5bf3d42d9, type: 3}
       propertyPath: list.Array.data[0]
       value: 
       objectReference: {fileID: 1979209343}
@@ -7463,6 +7471,14 @@ PrefabInstance:
       propertyPath: list.Array.data[2]
       value: 
       objectReference: {fileID: 0}
+    - target: {fileID: 7133354131563805657, guid: 73ecba1cd3b1e034bb2177c5bf3d42d9, type: 3}
+      propertyPath: towers.Array.data[0]
+      value: 
+      objectReference: {fileID: 1979209343}
+    - target: {fileID: 7133354131563805657, guid: 73ecba1cd3b1e034bb2177c5bf3d42d9, type: 3}
+      propertyPath: towers.Array.data[1]
+      value: 
+      objectReference: {fileID: 200372273}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -15285,7 +15301,7 @@ SceneRoots:
   - {fileID: 1035877780}
   - {fileID: 1456634091}
   - {fileID: 4171246598033321497}
+  - {fileID: 957253937}
   - {fileID: 6175475632065791468}
   - {fileID: 1317683249}
-  - {fileID: 957253937}
   - {fileID: 724840280}

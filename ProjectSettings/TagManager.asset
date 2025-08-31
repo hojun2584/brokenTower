@@ -16,6 +16,7 @@ TagManager:
   - 
   - 
   - Player
+  - PlayerGround
   - PlayerFlight
   - 
   - 
@@ -24,10 +25,9 @@ TagManager:
   - 
   - 
   - 
-  - 
   - Enemy
+  - EnemyGround
   - EnemyFlight
-  - 
   - 
   - 
   - 

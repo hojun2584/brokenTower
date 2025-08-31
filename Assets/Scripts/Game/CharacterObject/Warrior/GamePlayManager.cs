@@ -5,6 +5,7 @@ using Hojun;
 using CustomPacket;
 using System;
 using CustomClient;
+using Unity.VisualScripting;
 
 namespace Hojun
 {
@@ -12,41 +13,47 @@ namespace Hojun
 
     public class GamePlayManager : MonoBehaviour
     {
-        public CustomPriorityQue<Tower> towers = new CustomPriorityQue<Tower> ( ( x , y ) => { return x.towerPriority > y.towerPriority; } );
-        public List<Node> nodes = new List<Node> ();
+        
 
+        public List<Node> nodes = new List<Node> ();
         public GameRoomCameraController gameCamera;
 
-        public Tower enemyTower;
-        public Tower allieTower;
-
+        public List<Tower> towers = new List<Tower> ();
         public GameObject warrior;
         public Dictionary<int , GameObject> spawnDict = new Dictionary<int , GameObject> ();
-
         public Action gameSetting;
+
+        public Tower roomMasterTower;
+        public Tower visitorTower;
+
+
+
+        public bool IsRoomMaster { get => NetworkManager.instance.session.SessionId == LobbyManager.Instance.CurrentGameRoom.roomMasterSessionId;}
+
+        public bool isGameSetting;
 
         static GamePlayManager instance;
         public static GamePlayManager Instance { get => instance; }
-
         public int setSpawnObjet;
 
         public void Awake()
         {
+            instance = this;
             spawnDict[0] = warrior;
             gameSetting += GameCameraSetting;
         }
 
         public void Start()
         {
-            instance = this;
+            if(instance == null)
+                instance = this;
             gameSetting?.Invoke();
+            TowerSwap();
+        }
 
-            if (LobbyManager.Instance.CurrentGameRoom.roomMasterSessionId != NetworkManager.instance.session.SessionId)
-            {
-                Tower swaper = enemyTower;
-                enemyTower = allieTower;
-                allieTower = swaper;
-            }
+        public void TowerSwap()
+        {
+            bool towerSetting = LobbyManager.Instance.CurrentGameRoom.roomMasterSessionId == NetworkManager.instance.session.SessionId;
         }
         
         public void GameCameraSetting()
@@ -72,8 +79,18 @@ namespace Hojun
             {
                 summonObj.gamePlayManager = this;
                 summonObj.currentNode = spawn;
-                summonObj.targetNode = enemyTower.currentNode;
+
+                bool towerSetting = LobbyManager.Instance.CurrentGameRoom.roomMasterSessionId == NetworkManager.instance.session.SessionId;
+                
+
+                summonObj.InitSummon();
             }
+        }
+
+        public Tower GetEnemyTower()
+        {
+            
+            return towers[0];
         }
 
 
@@ -92,7 +109,7 @@ namespace Hojun
                         Debug.Log("Spawn Node ID: " + spawn.NodeId);
 
                         SummondPacket packet = new SummondPacket();
-                        //packet.Init(spawn.NodeId, LobbyManager.Instance.CurrentGameRoom.roomNum);
+                        packet.Init(spawn.NodeId, LobbyManager.Instance.CurrentGameRoom.roomNum, NetworkManager.instance.session.SessionId);
 
                         NetworkManager.instance.session.Send(packet.Write());
                     }

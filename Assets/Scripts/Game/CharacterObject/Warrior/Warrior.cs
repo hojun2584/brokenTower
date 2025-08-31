@@ -5,7 +5,6 @@ using System.Linq;
 using Hojun;
 using System;
 using CustomClient;
-using UnityEditor.Experimental.GraphView;
 
 namespace Hojun
 {
@@ -84,10 +83,11 @@ namespace Hojun
         public WarriorInfo warriorStatus;
 
         public bool targetFind = false;
-        
-        public Tower towerPositon;
 
-        public LayerMask layer;
+        //public Tower towerPositon;
+
+        public Tower enemyTower;
+
         public GameObject target;
 
 
@@ -119,36 +119,16 @@ namespace Hojun
         }
 
 
-        public void Awake()
-        {
-            InitSummon();
-            warriorStatus.attackAbleLayer = (int)SummonLayer.Enemy | (int)SummonLayer.EnemyFlight;
-        }
-
         public void Update()
         {
-
-            //Collider[] hitColliders = Physics.OverlapSphere(transform.position, warriorStatus.attackArea, warriorStatus.attackAbleLayer );
-            
-            //var sortedColliders = hitColliders.OrderBy(c => Vector3.Distance(transform.position, c.transform.position)).ToArray();
-            //layer = warriorStatus.attackAbleLayer;
-            //foreach (var item in sortedColliders)
-            //{
-            //    if (item.transform.TryGetComponent<IHitAble>(out IHitAble hitObject))
-            //    {
-            //        target = item.gameObject;
-            //        targetFind = true;
-
-            //        break;
-            //    }
-            //}
-
             CustomStateMachine.Update();
         }
 
 
         public void Start()
         {
+
+            
             transform.position = currentNode.GetPositionSetY();
             CustomStateMachine.SetState((int)WarriorState.MOVE);
         }
@@ -259,24 +239,14 @@ namespace Hojun
             // 레이어 셋팅 하는데 지금 서버에서 내꺼이냐 아니냐 가르쳐 주고 있음
             // 이거 바탕으로 생성 될 때 내꺼 레이어 설정하고 
             // 상대꺼 레이어는 무조건 enemy로 설정하면 공격하기 쉬워질 듯?
-            // 완료 하면 260번 줄만 지울 것 <- (자기 자신)
+            // 이거 마우스 반대 버튼 누르면 initSummonEnemy 호출 하는 방식으로 함수 하나 더 
+            Debug.Log("내 캐릭터 소환");
 
-            Debug.Log("범위 바꿀 것");
+            warriorStatus = new WarriorInfo.Builder().SetName("Warrior").SetHp(50).SetAttackArea(3.0f).SetAttackLayer((int)SummonLayerMask.EnemyGround | (int)SummonLayerMask.Enemy).Build();
+            gameObject.layer = (int)SummonLayer.PlayerGround;
+            
+            targetNode = gamePlayManager.towers[0].currentNode;
 
-            if (ownerSessionId == NetworkManager.instance.session.SessionId) 
-            { 
-                warriorStatus = new WarriorInfo.Builder().SetName("Warrior").SetHp(50).SetAttackArea(3.0f).SetAttackLayer((int)SummonLayer.EnemyGround).Build();
-                gameObject.layer = (int)SummonLayer.Player | (int)SummonLayer.PlayerGround;
-            }
-            else
-            {
-                warriorStatus = new WarriorInfo.Builder().SetName("EnemyWarrior").SetHp(50).SetAttackArea(3.0f).SetAttackLayer((int)SummonLayer.PlayerGround).Build();
-                gameObject.layer = (int)SummonLayer.Enemy | (int)SummonLayer.EnemyGround;
-            }
-
-
-
-            targetNode = towerPositon.currentNode;
             CustomStateMachine.AddState((int)WarriorState.MOVE, new WarriorMoveState(CustomStateMachine));
             CustomStateMachine.stateDict[(int)WarriorState.MOVE].enterAction += Move;
             CustomStateMachine.AddState((int)WarriorState.ATTACK, new WarriorAttackState(CustomStateMachine));
@@ -285,10 +255,10 @@ namespace Hojun
 
         public void SetTargetLayer(int layer)
         {
-            if(layer == (int)SummonLayer.Player)
-                warriorStatus.attackAbleLayer = (int)SummonLayer.EnemyGround;
+            if(layer == (int)SummonLayerMask.Player)
+                warriorStatus.attackAbleLayer = (int)SummonLayerMask.EnemyGround;
             else
-                warriorStatus.attackAbleLayer = (int)SummonLayer.PlayerGround;
+                warriorStatus.attackAbleLayer = (int)SummonLayerMask.PlayerGround;
 
         }
     }

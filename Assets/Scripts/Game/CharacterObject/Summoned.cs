@@ -13,7 +13,7 @@ namespace Hojun
     }
 
     [System.Flags]
-    public enum SummonLayer
+    public enum SummonLayerMask
     {
         
         Player = 1 << 10,
@@ -23,6 +23,18 @@ namespace Hojun
         Enemy = 1 << 20,
         EnemyGround = 1 << 21,
         EnemyFlight = 1 << 22,
+    }
+    [System.Flags]
+    public enum SummonLayer
+    {
+
+        Player =  10,
+        PlayerGround = 11,
+        PlayerFlight = 12,
+
+        Enemy = 20,
+        EnemyGround = 21,
+        EnemyFlight = 22,
     }
 
 

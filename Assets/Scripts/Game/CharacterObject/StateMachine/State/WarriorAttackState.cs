@@ -18,6 +18,7 @@ public class WarriorAttackState : State
     {
         base.Enter();
         ownerWarrior.GetAnimator.SetInteger("State", 2);
+        ownerWarrior.Attack( ownerWarrior.target.GetComponent<IHitAble>() );
     }
     public override void Update()
     {
