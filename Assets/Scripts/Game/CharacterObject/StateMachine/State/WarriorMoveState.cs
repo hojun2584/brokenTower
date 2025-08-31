@@ -19,8 +19,6 @@ namespace Hojun
         public override void Enter()
         {
             base.Enter();
-
-            
             ownerWarrior.GetAnimator.SetInteger("State", 1);
         }
         public override void Update() 
@@ -30,8 +28,11 @@ namespace Hojun
             if (ownerWarrior.IsAttackAble())
             {
                 ownerWarrior.CustomStateMachine.SetState((int)WarriorState.ATTACK);
+                
             }
 
+            if (ownerWarrior.IsDead)
+                ownerWarrior.CustomStateMachine.SetState((int)WarriorState.DEAD);
         }
 
         public override void Exit() 

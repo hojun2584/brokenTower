@@ -23,6 +23,11 @@ public class WarriorAttackState : State
     public override void Update()
     {
         base.Update();
+        if (!ownerWarrior.IsAttackAble())
+            ownerWarrior.CustomStateMachine.SetState((int)WarriorState.MOVE);
+
+        if (ownerWarrior.IsDead)
+            ownerWarrior.CustomStateMachine.SetState((int)WarriorState.DEAD);
     }
 
     public override void Exit()

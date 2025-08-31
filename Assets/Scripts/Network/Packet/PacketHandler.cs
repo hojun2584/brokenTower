@@ -203,7 +203,7 @@ namespace Assets.Scripts.Network.Packet
 
                 Node spawnNode = GamePlayManager.Instance.nodes.Find((x)=> x.NodeId == packet.nodeId);
 
-                GamePlayManager.Instance.SpawnCharacter(spawnNode, NetworkManager.instance.session.SessionId);
+                GamePlayManager.Instance.SpawnCharacter(spawnNode, packet.playerSessionId);
             });
 
             //SummondPacket packet = new SummondPacket();

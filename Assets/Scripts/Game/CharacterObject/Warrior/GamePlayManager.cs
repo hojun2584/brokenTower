@@ -79,9 +79,12 @@ namespace Hojun
             {
                 summonObj.gamePlayManager = this;
                 summonObj.currentNode = spawn;
-
-                bool towerSetting = LobbyManager.Instance.CurrentGameRoom.roomMasterSessionId == NetworkManager.instance.session.SessionId;
-                
+                summonObj.ownerSessionId = playerSessionId;
+                // 여기서 체크 해야함 무엇을? 
+                // 나의 정보를 가지고 소환 될 것이냐
+                // 상대의 정보를 가지고 소환 될 것이냐
+                // 현재는 룸마스터세션이 아닐 경우 소환만 정상적임
+                // 이제는 룸마스터 세션일 경우 소환을 만들어야 할 듯
 
                 summonObj.InitSummon();
             }
@@ -96,25 +99,27 @@ namespace Hojun
 
         public void SummonCharacter()
         {
-
-            if (Input.GetMouseButtonDown(0)) // 마우스 오른 쪽 버튼 클릭
-            {
-                Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-                RaycastHit hit;
-                if (Physics.Raycast(ray, out hit))
+            //if (NetworkManager.instance.session.SessionId == LobbyManager.Instance.CurrentGameRoom.roomMasterSessionId)
+            //{
+                if (Input.GetMouseButtonDown(0)) // 마우스 오른 쪽 버튼 클릭
                 {
-                    if (hit.transform.TryGetComponent<Node>(out Node spawn))
+                    Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+                    RaycastHit hit;
+                    if (Physics.Raycast(ray, out hit))
                     {
+                        if (hit.transform.TryGetComponent<Node>(out Node spawn))
+                        {
 
-                        Debug.Log("Spawn Node ID: " + spawn.NodeId);
+                            Debug.Log("Spawn Node ID: " + spawn.NodeId);
 
-                        SummondPacket packet = new SummondPacket();
-                        packet.Init(spawn.NodeId, LobbyManager.Instance.CurrentGameRoom.roomNum, NetworkManager.instance.session.SessionId);
-
-                        NetworkManager.instance.session.Send(packet.Write());
+                            SummondPacket packet = new SummondPacket();
+                            packet.Init(spawn.NodeId, LobbyManager.Instance.CurrentGameRoom.roomNum, NetworkManager.instance.session.SessionId);
+                            NetworkManager.instance.session.Send(packet.Write());
+                        }
                     }
                 }
-            }
+            //}
+
         }
 
         void Update()

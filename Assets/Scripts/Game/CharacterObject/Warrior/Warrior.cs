@@ -70,7 +70,7 @@ namespace Hojun
     {
         MOVE = 1,
         ATTACK = 2,
-
+        DEAD = 3,
 
     }
     #endregion
@@ -84,12 +84,14 @@ namespace Hojun
 
         public bool targetFind = false;
 
-        //public Tower towerPositon;
+        public float hp;
 
         public Tower enemyTower;
 
         public GameObject target;
 
+
+        public bool IsDead { get => warriorStatus.hp <= 0; }
 
         public Animator GetAnimator { 
             get 
@@ -118,19 +120,20 @@ namespace Hojun
             }
         }
 
+        Coroutine moveCorutine;
 
         public void Update()
         {
             CustomStateMachine.Update();
+            hp = warriorStatus.hp;
         }
 
 
         public void Start()
         {
-
-            
             transform.position = currentNode.GetPositionSetY();
             CustomStateMachine.SetState((int)WarriorState.MOVE);
+            
         }
 
 
@@ -147,32 +150,38 @@ namespace Hojun
                 {
                     target = item.gameObject;
                     targetFind = true;
-
-                    Debug.Log("targetFind");
                     return true;
                 }
             }
+            targetFind = false;
             return false;
         }
 
 
         public void Attack(IHitAble hitObject)
         {
-            if (hitObject != null)
+            StartCoroutine( AttackDelay(hitObject) );
+        }
+
+        private IEnumerator AttackDelay(IHitAble hitObject)
+        {
+            yield return new WaitForSeconds(0.4f);
+            while (IsAttackAble())
             {
                 hitObject.Hit(warriorStatus.atkPoint);
+                yield return new WaitForSeconds(0.8f);
             }
         }
 
         public void Dead()
         {
-
             StartCoroutine(DeadTimer());
         }
 
         IEnumerator DeadTimer() 
         {
-            yield return new WaitForSeconds(5.0f);
+            yield return new WaitForSeconds(3.0f);
+            gameObject.GetComponent<Collider>().enabled = false;
             Destroy(this.gameObject);
         }
 
@@ -188,6 +197,7 @@ namespace Hojun
             {
                 warriorStatus.hp -= hitObject;    
             }
+
         }
 
 
@@ -196,31 +206,29 @@ namespace Hojun
         public void Move()
         {
             moveRoutes = AstarAlgorithm.Instacne.FindPath(currentNode, targetNode, AstarAlgorithm.Instacne.nodeList);
-
-            StartCoroutine(moveCube(this.gameObject , moveRoutes));
+            moveCorutine = StartCoroutine(MoveCube(this.gameObject , moveRoutes));
         }
 
-        IEnumerator moveCube(GameObject cube, List<Node> route)
+        IEnumerator MoveCube(GameObject cube, List<Node> route)
         {
             foreach (var item in route)
             {
-                yield return movePosition(cube, item);
+                yield return MovePosition(cube, item, route);
+
+                
             }
         }
 
-        IEnumerator movePosition(GameObject operand, Node targetPosition)
+        IEnumerator MovePosition(GameObject operand, Node targetPosition, List<Node> route)
         {
-
             while (Vector3.Distance(operand.transform.position, targetPosition.GetPositionSetY()) > 0.1f)
             {
-                
-                transform.position = Vector3.MoveTowards(transform.position, targetPosition.GetPositionSetY(), warriorStatus.speed * Time.deltaTime);
+                transform.position = Vector3.MoveTowards(transform.position, targetPosition.GetPositionSetY(), 1f * Time.deltaTime);
                 transform.LookAt(targetPosition.GetPositionSetY());
-
-                yield return new WaitWhile(() => targetFind);
+                yield return new WaitUntil(() => !targetFind);
             }
-
             operand.transform.position = targetPosition.GetPositionSetY();
+            currentNode = targetPosition;
         }
 
 
@@ -240,18 +248,47 @@ namespace Hojun
             // 이거 바탕으로 생성 될 때 내꺼 레이어 설정하고 
             // 상대꺼 레이어는 무조건 enemy로 설정하면 공격하기 쉬워질 듯?
             // 이거 마우스 반대 버튼 누르면 initSummonEnemy 호출 하는 방식으로 함수 하나 더 
-            Debug.Log("내 캐릭터 소환");
-
-            warriorStatus = new WarriorInfo.Builder().SetName("Warrior").SetHp(50).SetAttackArea(3.0f).SetAttackLayer((int)SummonLayerMask.EnemyGround | (int)SummonLayerMask.Enemy).Build();
-            gameObject.layer = (int)SummonLayer.PlayerGround;
             
-            targetNode = gamePlayManager.towers[0].currentNode;
+            if(ownerSessionId == NetworkManager.instance.session.SessionId)
+                AllianceSummonInit();
+            else
+                EnemySummonInit();
 
-            CustomStateMachine.AddState((int)WarriorState.MOVE, new WarriorMoveState(CustomStateMachine));
-            CustomStateMachine.stateDict[(int)WarriorState.MOVE].enterAction += Move;
-            CustomStateMachine.AddState((int)WarriorState.ATTACK, new WarriorAttackState(CustomStateMachine));
-            CustomStateMachine.stateDict[(int)WarriorState.ATTACK].enterAction += () => StopCoroutine("Move");
+
+            WarriorStateMachineInit();
+
         }
+
+
+        public void WarriorStateMachineInit()
+        {
+            CustomStateMachine.AddState((int)WarriorState.MOVE, new WarriorMoveState(CustomStateMachine));
+            CustomStateMachine.AddState((int)WarriorState.ATTACK, new WarriorAttackState(CustomStateMachine));
+            CustomStateMachine.AddState((int)WarriorState.DEAD, new WarriorDeadState(CustomStateMachine));
+
+            CustomStateMachine.stateDict[(int)WarriorState.MOVE].enterAction += Move;
+            CustomStateMachine.stateDict[(int)WarriorState.MOVE].exitAction += () => StopCoroutine(moveCorutine);
+
+
+        }
+
+        public void AllianceSummonInit()
+        {
+            Debug.Log("내 캐릭터 소환");
+            warriorStatus = new WarriorInfo.Builder().SetAtkPoint(3f).SetSpeed(1.0f).SetName("Warrior").SetHp(10).SetAttackArea(3.0f).SetAttackLayer((int)SummonLayerMask.EnemyGround | (int)SummonLayerMask.Enemy).Build();
+            gameObject.layer = (int)SummonLayer.PlayerGround;
+            targetNode = gamePlayManager.towers[0].currentNode;
+        }
+
+        public void EnemySummonInit()
+        {
+            Debug.Log("적 캐릭터 소환");
+            warriorStatus = new WarriorInfo.Builder().SetAtkPoint(3f).SetSpeed(1.0f).SetName("EnemyWarrior").SetHp(10).SetAttackArea(3.0f).SetAttackLayer((int)SummonLayerMask.PlayerGround | (int)SummonLayerMask.Player).Build();
+            gameObject.layer = (int)SummonLayer.EnemyGround;
+            targetNode = gamePlayManager.towers[1].currentNode;
+        }
+
+
 
         public void SetTargetLayer(int layer)
         {
