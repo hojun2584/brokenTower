@@ -80,11 +80,10 @@ namespace Hojun
     public class Warrior : Summoned, IAttackAble, IHitAble, IDeadAble, IMoveAble
     {
         public List<Node> moveRoutes = new List<Node>();
-        public WarriorInfo warriorStatus;
+        WarriorInfo warriorStatus;
 
         public bool targetFind = false;
 
-        public float hp;
 
         public Tower enemyTower;
 
@@ -125,7 +124,6 @@ namespace Hojun
         public void Update()
         {
             CustomStateMachine.Update();
-            hp = warriorStatus.hp;
         }
 
 
@@ -180,8 +178,9 @@ namespace Hojun
 
         IEnumerator DeadTimer() 
         {
-            yield return new WaitForSeconds(3.0f);
+            stateMachine.SetState((int)WarriorState.DEAD);
             gameObject.GetComponent<Collider>().enabled = false;
+            yield return new WaitForSeconds(3.0f);
             Destroy(this.gameObject);
         }
 
@@ -190,13 +189,9 @@ namespace Hojun
             warriorStatus.speed = 0f;
 
             if (warriorStatus.hp - hitObject <= 0)
-            {
                 Dead();
-            }
             else
-            {
-                warriorStatus.hp -= hitObject;    
-            }
+                warriorStatus.hp -= hitObject;
 
         }
 

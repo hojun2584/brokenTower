@@ -19,7 +19,6 @@ namespace CustomClient
 	public class ServerSession : Session
 	{
 		public Dictionary<ushort, PacketHandler> packetHandleDic = new Dictionary<ushort, PacketHandler>();
-		public GameRoom currentRoom;
 
 
 		public ServerSession()
@@ -51,7 +50,6 @@ namespace CustomClient
             pos += 2;
             ushort id = BitConverter.ToUInt16(buffer.Array, buffer.Offset + pos);
             pos += 2;
-
 
             packetHandleDic[id].PacketHandle(buffer);
 

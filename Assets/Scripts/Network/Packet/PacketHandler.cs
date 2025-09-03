@@ -220,4 +220,25 @@ namespace Assets.Scripts.Network.Packet
             //});
         }
     }
+
+    public class GameEndResultHandle : PacketHandler
+    {
+        public GameEndResultHandle(ServerSession session) : base(session)
+        {
+            
+        }
+
+        public override void PacketHandle(ArraySegment<byte> buffer)
+        {
+            GameEndResultPacket packet = new GameEndResultPacket(buffer);
+
+            JobQueue.Instance.Add(() =>
+            {
+                UnityEngine.Debug.Log(packet.winner_DB_Id +" 님이 승리 하셨습니다.");
+                FloatingBar.Instance.SetTmpText = "GAME END";
+            });
+
+
+        }
+    }
 }

@@ -13,7 +13,8 @@ namespace Hojun
 
     public class GamePlayManager : MonoBehaviour
     {
-        
+        const int PlayerTower = 0;
+        const int EnemyTower = 1;
 
         public List<Node> nodes = new List<Node> ();
         public GameRoomCameraController gameCamera;
@@ -54,6 +55,14 @@ namespace Hojun
         public void TowerSwap()
         {
             bool towerSetting = LobbyManager.Instance.CurrentGameRoom.roomMasterSessionId == NetworkManager.instance.session.SessionId;
+
+            if (!towerSetting)
+            {
+                int swaper = towers[PlayerTower].gameObject.layer;
+                towers[PlayerTower].gameObject.layer = towers[EnemyTower].gameObject.layer;
+                towers[EnemyTower].gameObject.layer = swaper;
+            }   
+
         }
         
         public void GameCameraSetting()

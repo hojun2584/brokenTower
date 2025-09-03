@@ -18,7 +18,6 @@ namespace Hojun
         {
             base.Enter();
             ownerWarrior.GetAnimator.SetInteger("State", 3);
-            ownerWarrior.Dead();
         }
         public override void Update()
         {

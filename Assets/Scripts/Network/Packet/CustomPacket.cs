@@ -1,4 +1,5 @@
 using Assets.Scripts;
+using JetBrains.Annotations;
 using Server;
 using ServerCore;
 using System;
@@ -47,6 +48,8 @@ namespace CustomPacket
 
         GAME_START = 50,
         GAME_START_RESULT = 51,
+        GAME_END = 52,
+        GAME_END_RESULT = 53,
 
         ROOM_MASTER = 60,
 
@@ -736,5 +739,79 @@ namespace CustomPacket
             BitConverter.TryWriteBytes(new Span<byte>(buffer.Array, buffer.Offset + count, buffer.Count - count), nodeId);
             count += sizeof(int);
         }
+    }
+
+
+    public class GameEndPacket : Packet
+    {
+        public int roomNum;
+        public string winner_DB_Id;
+        public string loser_DB_Id;
+
+        public GameEndPacket()
+        {
+            packetNum = PacketID.GAME_START;
+            Write();
+        }
+
+        public void Init( string winner_DB_Id, string loser_DB_Id)
+        {
+            this.winner_DB_Id = winner_DB_Id;
+            this.loser_DB_Id = loser_DB_Id;
+            this.roomNum = LobbyManager.Instance.CurrentGameRoom.roomNum;
+        }
+        public override void Read(ArraySegment<byte> buffer)
+        {
+        }
+        protected override void WriteTemplate(ref ArraySegment<byte> buffer, ref ushort count)
+        {
+            BitConverter.TryWriteBytes(new Span<byte>(buffer.Array, buffer.Offset + count, buffer.Count - count), (ushort)packetNum);
+            count += sizeof(ushort);
+            BitConverter.TryWriteBytes(new Span<byte>(buffer.Array, buffer.Offset + count, buffer.Count - count), roomNum);
+            count += sizeof(int);
+            WriteString(ref buffer,ref count, winner_DB_Id);
+            WriteString(ref buffer, ref count, loser_DB_Id);
+        }
+    }
+    
+    public class GameEndResultPacket : Packet
+    {
+
+        // 지금 생각해 보니까 packet ReadOnly WriteOnly 하게 쓰고 있는 것 같은데 이거 그냥 interface 같은걸로 나눴어야 했나 하네
+        public bool isEnd;
+        public int roomNum;
+        public string winner_DB_Id;
+
+        public GameEndResultPacket()
+        {
+            packetNum = PacketID.GAME_END_RESULT;
+        }
+        public GameEndResultPacket(ArraySegment<byte> buffer)
+        {
+            Read(buffer);
+        }
+
+        public override void Read(ArraySegment<byte> buffer)
+        {
+            ushort count = 4;
+            isEnd = BitConverter.ToBoolean(buffer.Array, buffer.Offset + count);
+            count += sizeof(bool);
+            roomNum = BitConverter.ToInt32(buffer.Array, buffer.Offset + count);
+            count += sizeof(int);
+            ReadString(ref buffer, ref count);
+
+        }
+        protected override void WriteTemplate(ref ArraySegment<byte> buffer, ref ushort count)
+        {
+            BitConverter.TryWriteBytes(new Span<byte>(buffer.Array, buffer.Offset + count, buffer.Count - count), (ushort)packetNum);
+            count += sizeof(ushort);
+            BitConverter.TryWriteBytes(new Span<byte>(buffer.Array, buffer.Offset + count, buffer.Count - count), isEnd);
+            count += sizeof(bool);
+            BitConverter.TryWriteBytes(new Span<byte>(buffer.Array, buffer.Offset + count, buffer.Count - count), roomNum);
+            count += sizeof(int);
+            BitConverter.TryWriteBytes(new Span<byte>(buffer.Array, buffer.Offset + count, buffer.Count - count), winner_DB_Id);
+            count += sizeof(int);
+        }
+
     }
 }

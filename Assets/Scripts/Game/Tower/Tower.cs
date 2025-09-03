@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Hojun;
+using CustomPacket;
 
 
 namespace Hojun
@@ -11,6 +12,7 @@ namespace Hojun
     {
         public Node currentNode;
         public int towerPriority;
+        public string ownerPlayerName;
 
         [SerializeField]
         float hPoint= 50;
@@ -33,12 +35,24 @@ namespace Hojun
             }
         }
 
-
         public void Hit(float hitObject)
         {
             HPoint -= hitObject;
+            if(HPoint <= 0)
+                GameOver();
+            
         }
 
+        public void GameOver()
+        {
+            Debug.Log("GameOver");
+            
+            GameEndPacket packet = new GameEndPacket();
+            //packet.Init(GameManager.Instance.CurrentPlayer.playerName);
+
+            NetworkManager.instance.session.Send(packet.Write());
+
+        }
 
     }
 }
