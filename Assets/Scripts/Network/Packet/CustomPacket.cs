@@ -745,20 +745,21 @@ namespace CustomPacket
     public class GameEndPacket : Packet
     {
         public int roomNum;
-        public string winner_DB_Id;
-        public string loser_DB_Id;
+        public int packetOwnerSessionId;
+        public bool isWin;
+
 
         public GameEndPacket()
         {
-            packetNum = PacketID.GAME_START;
+            packetNum = PacketID.GAME_END;
             Write();
         }
 
-        public void Init( string winner_DB_Id, string loser_DB_Id)
+        public void Init(int roomNum, int sessionId, bool isWin)
         {
-            this.winner_DB_Id = winner_DB_Id;
-            this.loser_DB_Id = loser_DB_Id;
-            this.roomNum = LobbyManager.Instance.CurrentGameRoom.roomNum;
+            this.roomNum = roomNum;
+            packetOwnerSessionId = sessionId;
+            this.isWin = isWin;
         }
         public override void Read(ArraySegment<byte> buffer)
         {
@@ -769,8 +770,10 @@ namespace CustomPacket
             count += sizeof(ushort);
             BitConverter.TryWriteBytes(new Span<byte>(buffer.Array, buffer.Offset + count, buffer.Count - count), roomNum);
             count += sizeof(int);
-            WriteString(ref buffer,ref count, winner_DB_Id);
-            WriteString(ref buffer, ref count, loser_DB_Id);
+            BitConverter.TryWriteBytes(new Span<byte>(buffer.Array, buffer.Offset + count, buffer.Count - count), packetOwnerSessionId);
+            count += sizeof(int);
+            BitConverter.TryWriteBytes(new Span<byte>(buffer.Array, buffer.Offset + count, buffer.Count - count), isWin);
+            count += sizeof(bool);
         }
     }
     
@@ -808,8 +811,6 @@ namespace CustomPacket
             BitConverter.TryWriteBytes(new Span<byte>(buffer.Array, buffer.Offset + count, buffer.Count - count), isEnd);
             count += sizeof(bool);
             BitConverter.TryWriteBytes(new Span<byte>(buffer.Array, buffer.Offset + count, buffer.Count - count), roomNum);
-            count += sizeof(int);
-            BitConverter.TryWriteBytes(new Span<byte>(buffer.Array, buffer.Offset + count, buffer.Count - count), winner_DB_Id);
             count += sizeof(int);
         }
 

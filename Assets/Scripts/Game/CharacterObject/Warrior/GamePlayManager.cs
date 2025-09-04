@@ -61,7 +61,9 @@ namespace Hojun
                 int swaper = towers[PlayerTower].gameObject.layer;
                 towers[PlayerTower].gameObject.layer = towers[EnemyTower].gameObject.layer;
                 towers[EnemyTower].gameObject.layer = swaper;
-            }   
+            }
+            towers[PlayerTower].isAlieTower = true;
+            towers[EnemyTower].isAlieTower= false;
 
         }
         

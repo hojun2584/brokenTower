@@ -14,6 +14,8 @@ namespace Hojun
         public int towerPriority;
         public string ownerPlayerName;
 
+        public bool isAlieTower;
+
         [SerializeField]
         float hPoint= 50;
 
@@ -48,7 +50,7 @@ namespace Hojun
             Debug.Log("GameOver");
             
             GameEndPacket packet = new GameEndPacket();
-            //packet.Init(GameManager.Instance.CurrentPlayer.playerName);
+            packet.Init(LobbyManager.Instance.CurrentGameRoom.roomNum , NetworkManager.instance.session.SessionId, !isAlieTower);
 
             NetworkManager.instance.session.Send(packet.Write());
 
